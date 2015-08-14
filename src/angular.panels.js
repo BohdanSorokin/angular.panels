@@ -7,10 +7,10 @@
 (function ( angular ) {
 	"use strict";
 
-	var module = angular.module('angular.panels', []);
+	var module = angular.module( "angular.panels", [] );
 
-	module.constant('panelList', {});
-	module.provider('panels', ['panelList', function (panelList) {
+	module.constant("panelList", {});
+	module.provider("panels", ["panelList", function (panelList) {
 
 		//add panels in config
 		this.add = function (panel) {
@@ -83,11 +83,11 @@
 				//panel style
 				style: function (panel, open) {
 					switch (panel.position) {
-						case 'top': case 'bottom':
-							return panel.position + ':' + (open ? '0;' : '-' + panel.size + ';') + 'height:' + panel.size + '';
+						case "top": case "bottom":
+							return panel.position + ":" + (open ? "0;" : "-" + panel.size + ";") + "height:" + panel.size + "";
 
-						case 'left': case 'right':
-							return panel.position + ':"' + (open ? '0;' : '-' + panel.size + ';') + 'width:' + panel.size + '';
+						case "left": case "right":
+							return panel.position + ":" + (open ? "0;" : "-" + panel.size + ";") + "width:" + panel.size + "";
 					}
 				}
 			};
@@ -123,16 +123,17 @@
 					//get template (from template cache)
 					var html = $templateCache.get(panel.templateUrl);
 					if(html){
-						panelWrapper(panel, html);
+						panelWrapper(panel, html, key);
 					} else{
 						//get template
 						$http.get(panel.templateUrl).success(function (template) {
-							panelWrapper(panel, template);
+							panelWrapper(panel, template, key);
 						});
 					}
-					
-					function panelWrapper(panel, template){
-						//panel template
+				});
+				
+				function panelWrapper(panel, template, key){
+					//panel template
 						var template = '<div style="' + panels.style(panel) + '" class="panels panel-' + panel.position + '" data-ng-class="{open : panels.opened==\'' + panel.id + '\'}"  data-ng-controller="' + panel.controller + '">' + template + '</div>';
 						//compile template
 						var compiled = $compile(template)(scope);
@@ -140,8 +141,7 @@
 						element.append(compiled);
 						//save selector
 						panelList[key].element = angular.element(compiled);
-					}
-				});
+				}
 				
 				//add dim
 				element.append($compile('<div class="dimming" data-ng-class="{open : panels.opened}" data-ng-click="panels.close();"></div>')(scope));
