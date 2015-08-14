@@ -2,16 +2,15 @@
 	@license Angular Panels version 1.0.3
 	ⓒ 2015 AHN JAE-HA http://github.com/eu81273
 	License: MIT
-
 */
 
 (function ( angular ) {
 	"use strict";
 
-	var module = angular.module( "angular.panels", [] );
+	var module = angular.module('angular.panels', []);
 
-	module.constant("panelList", {});
-	module.provider("panels", ["panelList", function (panelList) {
+	module.constant('panelList', {});
+	module.provider('panels', ['panelList', function (panelList) {
 
 		//add panels in config
 		this.add = function (panel) {
@@ -84,11 +83,11 @@
 				//panel style
 				style: function (panel, open) {
 					switch (panel.position) {
-						case "top": case "bottom":
-							return panel.position + ":" + (open ? "0;" : "-" + panel.size + ";") + "height:" + panel.size + "";
+						case 'top': case 'bottom':
+							return panel.position + ':' + (open ? '0;' : '-' + panel.size + ';') + 'height:' + panel.size + '';
 
-						case "left": case "right":
-							return panel.position + ":" + (open ? "0;" : "-" + panel.size + ";") + "width:" + panel.size + "";
+						case 'left': case 'right':
+							return panel.position + ':"' + (open ? '0;' : '-' + panel.size + ';') + 'width:' + panel.size + '';
 					}
 				}
 			};
@@ -98,7 +97,7 @@
 	}]);
 
 	//panels directive
-	module.directive('panels', ['$http', '$compile', 'panels', 'panelList', function ($http, $compile, panels, panelList) {
+	module.directive('panels', ['$http', '$compile', 'panels', 'panelList', '$templateCache', function ($http, $compile, panels, panelList, $templateCache) {
 
 		return {
 			//attribute
@@ -116,10 +115,23 @@
 
 				//add panel
 				angular.forEach(panelList, function(panel, key) {
-
-					//get template
-					$http.get(panel.templateUrl).success(function (template) {
-
+					/*
+						08/13/2015
+						Add functionality for work with angular template cache.
+						author: Bohdan_Sorokin
+					*/
+					//get template (from template cache)
+					var html = $templateCache.get(panel.templateUrl);
+					if(html){
+						panelWrapper(panel, html);
+					} else{
+						//get template
+						$http.get(panel.templateUrl).success(function (template) {
+							panelWrapper(panel, template);
+						});
+					}
+					
+					function panelWrapper(panel, template){
 						//panel template
 						var template = '<div style="' + panels.style(panel) + '" class="panels panel-' + panel.position + '" data-ng-class="{open : panels.opened==\'' + panel.id + '\'}"  data-ng-controller="' + panel.controller + '">' + template + '</div>';
 						//compile template
@@ -128,7 +140,7 @@
 						element.append(compiled);
 						//save selector
 						panelList[key].element = angular.element(compiled);
-					});
+					}
 				});
 				
 				//add dim
